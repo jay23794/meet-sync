@@ -1,0 +1,38 @@
+services:
+  # ── REST API ────────────────────────────────────────────────────────────────
+  - type: web
+    name: videochat-api
+    runtime: node
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false          # paste your MongoDB Atlas URI in the Render dashboard
+
+  # ── Signaling server ────────────────────────────────────────────────────────
+  - type: web
+    name: videochat-signaling
+    runtime: node
+    plan: free
+    rootDir: apps/signaling
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: WEB_URL
+        sync: false          # paste your deployed web URL e.g. https://videochat-web.onrender.com
+
+  # ── Web app (static site) ───────────────────────────────────────────────────
+  - type: static
+    name: videochat-web
+    rootDir: apps/web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false          # paste your API URL e.g. https://videochat-api.onrender.com
+      - key: VITE_SIGNALING_URL
+        sync: false          # paste your signaling URL e.g. https://videochat-signaling.onrender.com
