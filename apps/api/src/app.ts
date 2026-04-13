@@ -8,7 +8,7 @@ import type { ApiResponse } from '@videochat/shared';
 
 const app = express();
 
-app.use(cors({ origin: process.env.WEB_URL || 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.WEB_URL || true }));
 app.use(express.json());
 
 app.use('/health', healthRouter);

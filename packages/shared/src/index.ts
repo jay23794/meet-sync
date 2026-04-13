@@ -7,6 +7,8 @@ export const SOCKET_EVENTS = {
   ANSWER:            'answer',
   ICE_CANDIDATE:     'ice_candidate',
   CHAT_MESSAGE:      'chat_message',
+  // Sent by either peer to end the current session and re-enter the queue
+  SKIP:              'skip',
 } as const;
 
 export type SocketEvent = typeof SOCKET_EVENTS[keyof typeof SOCKET_EVENTS];
@@ -14,7 +16,8 @@ export type SocketEvent = typeof SOCKET_EVENTS[keyof typeof SOCKET_EVENTS];
 export interface MatchFoundPayload {
   roomId: string;
   peerId: string;
-  initiator: boolean;
+  // "caller" creates the offer; "callee" waits for it and replies with an answer
+  role: 'caller' | 'callee';
 }
 
 export interface OfferPayload {
