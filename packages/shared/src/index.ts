@@ -62,4 +62,6 @@ export interface GuestTokenPayload {
 export interface GuestAuthResponse {
   token: string;      // the JWT string
   guestId: string;    // so the frontend knows its own ID without decoding JWT
+  name: string;       // display name (e.g. "Guest_a1b2c3d4")
+  avatar: string;     // avatar seed — feed to any avatar API (e.g. DiceBear)
 }

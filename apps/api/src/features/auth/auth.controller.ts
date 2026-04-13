@@ -6,8 +6,10 @@ export class AuthController {
   private service = new AuthService();
 
   // POST /api/auth/guest
-  createGuest = async (_req: Request, res: Response) => {
-    const result = await this.service.createGuestToken();
+  // Body (optional): { name?: string; avatar?: string }
+  createGuest = async (req: Request, res: Response) => {
+    const { name, avatar } = req.body as { name?: string; avatar?: string };
+    const result = await this.service.createGuestToken(name, avatar);
     const body: ApiResponse<GuestAuthResponse> = { success: true, data: result };
     res.status(201).json(body);
   };
@@ -27,7 +29,7 @@ export class AuthController {
       const payload = this.service.verifyToken(token);
       guestId = payload.guestId;
     } catch {
-      // expired or invalid — just create a fresh guest
+      // expired or invalid — issue a fresh guest identity
       const result = await this.service.createGuestToken();
       return res.json({ success: true, data: result });
     }

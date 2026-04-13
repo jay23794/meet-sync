@@ -12,7 +12,7 @@ app.use(cors({ origin: process.env.WEB_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
 app.use('/health', healthRouter);
-app.use('/auth', authRouter);
+app.use('/api/auth', authRouter);
 app.use('/api-docs', swaggerRouter);
 
 app.use((_req, res) => {
