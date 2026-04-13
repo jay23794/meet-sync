@@ -31,8 +31,4 @@ services:
     rootDir: apps/web
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        sync: false          # paste your API URL e.g. https://videochat-api.onrender.com
-      - key: VITE_SIGNALING_URL
-        sync: false          # paste your signaling URL e.g. https://videochat-signaling.onrender.com
+    # VITE_API_URL and VITE_SIGNALING_URL are set via .env.production in the repo
