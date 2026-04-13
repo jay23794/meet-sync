@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { GuestTokenPayload, GuestAuthResponse } from '@videochat/shared';
 import { AuthRepository } from './auth.repository';
 
@@ -14,14 +14,14 @@ function defaultName(guestId: string): string {
 function defaultAvatar(): string {
   // A random seed string; the frontend can feed this into any avatar API
   // e.g. https://api.dicebear.com/7.x/adventurer/svg?seed=<avatar>
-  return uuidv4().replace(/-/g, '').slice(0, 16);
+  return randomUUID().replace(/-/g, '').slice(0, 16);
 }
 
 export class AuthService {
   private repo = new AuthRepository();
 
   async createGuestToken(name?: string, avatar?: string): Promise<GuestAuthResponse> {
-    const guestId = `guest_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
+    const guestId = `guest_${randomUUID().replace(/-/g, '').slice(0, 12)}`;
     const resolvedName   = name   || defaultName(guestId);
     const resolvedAvatar = avatar || defaultAvatar();
 

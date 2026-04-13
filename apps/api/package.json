@@ -1,11 +1,10 @@
 {
   "name": "@videochat/api",
   "version": "0.0.1",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "typecheck": "tsc --noEmit",
-    "start": "tsx src/server.ts"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@videochat/shared": "*",
