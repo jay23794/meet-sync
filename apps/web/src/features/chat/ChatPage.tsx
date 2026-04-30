@@ -389,7 +389,10 @@ export default function ChatPage({ session, onLeave }: ChatPageProps) {
   }
 
   // ── Pre-connection states: idle / queued / connecting ──────────────────────
-  if (status === 'idle' || status === 'queued' || status === 'connecting') {
+  // Show StatusScreen only before we have a local stream (first-time flow).
+  // If localStream exists the user already had a session, so stay in the chat
+  // layout and show a searching banner instead of a full-page transition.
+  if (status === 'idle' || (!localStream && (status === 'queued' || status === 'connecting'))) {
     return (
       <StatusScreen
         status={status}
@@ -401,8 +404,9 @@ export default function ChatPage({ session, onLeave }: ChatPageProps) {
     );
   }
 
-  // ── Active session: chatting + peer_left ───────────────────────────────────
+  // ── Active session: chatting / queued (re-search) / connecting / peer_left ─
   const isLive = status === 'chatting';
+  const isSearching = status === 'queued' || status === 'connecting';
 
   return (
     <Flex
@@ -440,11 +444,11 @@ export default function ChatPage({ session, onLeave }: ChatPageProps) {
           <Button
             variant="pixel"
             size="sm"
-            onClick={status === 'peer_left' ? joinQueue : skip}
+            onClick={isSearching ? cancelQueue : (status === 'peer_left' ? joinQueue : skip)}
             fontSize="2xs"
             px={4}
           >
-            {status === 'peer_left' ? '▸ NEXT' : '▸ SKIP'}
+            {isSearching ? '▸ CANCEL' : status === 'peer_left' ? '▸ NEXT' : '▸ SKIP'}
           </Button>
           <Button
             variant="pixel-ghost"
@@ -458,7 +462,24 @@ export default function ChatPage({ session, onLeave }: ChatPageProps) {
         </HStack>
       </Flex>
 
-      {/* ── Peer-left banner ────────────────────────────────────────────────── */}
+      {/* ── Status banner (searching / peer-left) ───────────────────────────── */}
+      {isSearching && (
+        <Box
+          bg="retro.beige"
+          border="3px solid"
+          borderColor="retro.navy"
+          borderTop="none"
+          px={4}
+          py={2}
+          textAlign="center"
+          flexShrink={0}
+        >
+          <Text as="span" fontSize="2xs" color="retro.navy" letterSpacing="wider">
+            ▸ SEARCHING FOR A STRANGER
+          </Text>{' '}
+          <BlinkDots />
+        </Box>
+      )}
       {status === 'peer_left' && (
         <Box
           bg="retro.beige"
@@ -486,29 +507,50 @@ export default function ChatPage({ session, onLeave }: ChatPageProps) {
       >
 
         {/* ── Video column ──────────────────────────────────────────────────── */}
-        <Flex
-          direction="column"
+        {/* Stranger fills the whole column; local camera is a PiP overlay.
+            This avoids the wide-flat-strip problem on desktop since local
+            video is never stretched to the full column width. */}
+        <Box
+          position="relative"
+          display="flex"
           w={{ base: '100%', md: '55%' }}
-          h={{ base: '45%', md: 'auto' }}
-          gap="4px"
+          // Mobile: 16:9 drives the height. Desktop: stretch to fill row.
+          sx={{ aspectRatio: { base: '16/9', md: 'unset' } }}
+          alignSelf={{ md: 'stretch' }}
           flexShrink={0}
+          overflow="hidden"
         >
-          {/* Stranger's video (larger / primary) */}
+          {/* Stranger's video — always fills the column */}
           <VideoPanel
             stream={remoteStream}
             label="STRANGER"
             isLive={isLive}
           />
 
-          {/* Local preview (smaller) */}
-          <VideoPanel
-            stream={localStream}
-            muted
-            mirror
-            label={`YOU — ${session.name}`}
-            isLive={!!localStream}
-          />
-        </Flex>
+          {/* Local camera PiP — bottom-right corner.
+              Larger on desktop so you can actually see yourself. */}
+          <Box
+            position="absolute"
+            bottom={3}
+            right={3}
+            w={{ base: '38%', md: '28%' }}
+            sx={{ aspectRatio: '4/3' }}
+            zIndex={2}
+            border="3px solid"
+            borderColor="retro.navy"
+            boxShadow="3px 3px 0px #28396C"
+            overflow="hidden"
+            display="flex"
+          >
+            <VideoPanel
+              stream={localStream}
+              muted
+              mirror
+              label={`YOU — ${session.name}`}
+              isLive={!!localStream}
+            />
+          </Box>
+        </Box>
 
         {/* ── Chat column ───────────────────────────────────────────────────── */}
         <Flex

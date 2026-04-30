@@ -236,10 +236,12 @@ export function useChat(session: GuestSession) {
     });
 
     // ── PEER_DISCONNECTED ─────────────────────────────────────────────────────
+    // Auto-rejoin the queue so the user is immediately matched with someone new
     socket.on(SOCKET_EVENTS.PEER_DISCONNECTED, () => {
-      console.log('[webrtc] peer disconnected');
+      console.log('[webrtc] peer disconnected, rejoining queue');
       closePc();
-      setStatus('peer_left');
+      setStatus('queued');
+      socket.emit(SOCKET_EVENTS.JOIN_QUEUE);
     });
 
     // ── CHAT_MESSAGE ──────────────────────────────────────────────────────────
